@@ -53,7 +53,7 @@ router.post('/register', (req, res) => {
 router.post('/login', (req, res) => {
   const body = req.body;
   const privateKey = fs.readFileSync(
-    path.join(__dirname, '../../middlewares/private.key'),
+    path.join(__dirname, '../middlewares/private.key'),
     'utf8'
   );
   const dataPicked = _.pick(body, ['email', 'password']);

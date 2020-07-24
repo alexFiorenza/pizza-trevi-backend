@@ -5,9 +5,14 @@ const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
 const userController = require('./controllers/user');
 const productController = require('./controllers/product');
+const path = require('path');
+const fileupload = require('express-fileupload');
+const fileUpload = require('express-fileupload');
 /*Middlewares*/
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(express.static(path.join(__dirname, './uploads')));
+app.use(fileUpload());
 app.use('/api', userController);
 app.use('/api', productController);
 mongoose.connect(
