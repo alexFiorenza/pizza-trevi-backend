@@ -37,7 +37,14 @@ router.get('/product/:id', (req, res) => {
 /*Upload a new product*/
 router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
   const body = req.body;
-  const data = _.pick(body, ['type', 'description', 'price', 'name', 'top']);
+  const data = _.pick(body, [
+    'type',
+    'description',
+    'price',
+    'name',
+    'top',
+    'available',
+  ]);
   Object.assign(data, { image: null });
   if (data.type && data.description && data.price && data.name && data.top) {
     Product.create(data, (err, productCreated) => {
@@ -49,6 +56,32 @@ router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
         .json({ ok: true, message: 'Product was created', productCreated });
     });
   }
+});
+/*Update a product*/
+router.put('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
+  const params = req.params.id;
+  const body = req.body;
+  const dataToUpdate = _.pick(body, [
+    'type',
+    'price',
+    'description',
+    'name',
+    'top',
+    'available',
+  ]);
+  Product.findByIdAndUpdate(
+    params,
+    dataToUpdate,
+    { useFindAndModify: false, new: true },
+    (err, objUpdated) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: 'Internal error' });
+      }
+      return res
+        .status(200)
+        .json({ ok: true, message: 'Product updated', objUpdated });
+    }
+  );
 });
 /*Upload a image to a product*/
 router.put('/upload/:id', veriftyToken, verifyAdmin, (req, res) => {
