@@ -9,6 +9,7 @@ const productSchema = new Schema({
   image: String,
   top: Boolean,
   available: Boolean,
+  flavors: String,
 });
 
 module.exports = mongoose.model('Product', productSchema);

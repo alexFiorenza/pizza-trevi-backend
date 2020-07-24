@@ -46,6 +46,10 @@ router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
     'available',
   ]);
   Object.assign(data, { image: null });
+  if (data.type === 'docena' || data.type === 'helado') {
+    Object.assign(data, { flavors: body.flavors });
+    console.log(data);
+  }
   if (data.type && data.description && data.price && data.name && data.top) {
     Product.create(data, (err, productCreated) => {
       if (err) {
@@ -69,6 +73,9 @@ router.put('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
     'top',
     'available',
   ]);
+  if (dataToUpdate.type === 'docena' || dataToUpdate.type === 'helado') {
+    Object.assign(dataToUpdate, { flavors: body.flavors });
+  }
   Product.findByIdAndUpdate(
     params,
     dataToUpdate,
