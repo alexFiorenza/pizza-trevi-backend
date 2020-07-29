@@ -10,6 +10,7 @@ const productSchema = new Schema({
   top: Boolean,
   available: Boolean,
   flavors: String,
+  state: Boolean,
 });
 
 module.exports = mongoose.model('Product', productSchema);

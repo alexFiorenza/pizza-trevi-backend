@@ -6,16 +6,18 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
-router.get('/', (req, res) => {
-  return res
-    .status(200)
-    .send({ ok: true, message: 'Message from user controller' });
-});
+
 /*Register user*/
 router.post('/register', (req, res) => {
   const saltRounds = 10;
   const body = req.body;
-  const data = _.pick(body, ['name', 'email', 'direction', 'lastName']);
+  const data = _.pick(body, [
+    'name',
+    'email',
+    'direction',
+    'lastName',
+    'extraInfo',
+  ]);
   const hashedPassword = bcrypt.hashSync(body.password, saltRounds);
   Object.assign(data, {
     password: hashedPassword,
@@ -33,17 +35,19 @@ router.post('/register', (req, res) => {
       if (err) {
         return res.status(500).json({ ok: false, message: 'Server error' });
       }
-      if (userFound) {
+
+      if (userFound === undefined) {
         return res
           .status(400)
           .json({ ok: false, message: 'There is a user with that email' });
+      } else {
+        User.create(data, (err, user) => {
+          if (err) {
+            return res.status(500).json({ ok: false, message: 'Server error' });
+          }
+          return res.status(200).json({ ok: true, message: user });
+        });
       }
-      User.create(data, (err, user) => {
-        if (err) {
-          return res.status(500).json({ ok: false, message: 'Server error' });
-        }
-        return res.status(200).json({ ok: true, message: user });
-      });
     });
   } else {
     res.status(400).json({ ok: false, message: 'Data not provided' });

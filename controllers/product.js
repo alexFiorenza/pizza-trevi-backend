@@ -44,6 +44,7 @@ router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
     'name',
     'top',
     'available',
+    'state',
   ]);
   Object.assign(data, { image: null });
   if (data.type === 'docena' || data.type === 'helado') {
@@ -72,6 +73,7 @@ router.put('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
     'name',
     'top',
     'available',
+    'state',
   ]);
   if (dataToUpdate.type === 'docena' || dataToUpdate.type === 'helado') {
     Object.assign(dataToUpdate, { flavors: body.flavors });
@@ -89,6 +91,36 @@ router.put('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
         .json({ ok: true, message: 'Product updated', objUpdated });
     }
   );
+});
+/*Delete a product*/
+router.delete('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
+  const query = req.query.disable;
+  const id = req.params.id;
+  if (query === 'true') {
+    Product.findByIdAndUpdate(
+      id,
+      { state: false },
+      { new: true },
+      { useFindAndModify: false, new: true },
+      (err, productUpdated) => {
+        if (err) {
+          return res.status(500).json({ ok: false, message: 'Internal error' });
+        }
+        return res.status(200).json({ ok: true, message: productUpdated });
+      }
+    );
+  } else {
+    Product.findByIdAndDelete(id, (err, productDeleted) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: 'Internal error' });
+      }
+      if (productDeleted) {
+        return res
+          .status(200)
+          .json({ ok: true, message: 'Product was deleted' });
+      }
+    });
+  }
 });
 /*Upload a image to a product*/
 router.put('/upload/:id', veriftyToken, verifyAdmin, (req, res) => {

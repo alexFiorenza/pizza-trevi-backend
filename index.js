@@ -7,14 +7,15 @@ const userController = require('./controllers/user');
 const productController = require('./controllers/product');
 const path = require('path');
 const fileupload = require('express-fileupload');
-const fileUpload = require('express-fileupload');
+const orderController = require('./controllers/order');
 /*Middlewares*/
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, './uploads')));
-app.use(fileUpload());
+app.use(fileupload());
 app.use('/api', userController);
 app.use('/api', productController);
+app.use('/api', orderController);
 mongoose.connect(
   'mongodb://localhost:27017/pizzatrevi',
   { useNewUrlParser: true, useUnifiedTopology: true },
