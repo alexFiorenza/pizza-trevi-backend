@@ -15,7 +15,7 @@ router.post('/register', (req, res) => {
     'name',
     'email',
     'direction',
-    'lastName',
+    'phone',
     'extraInfo',
   ]);
   const hashedPassword = bcrypt.hashSync(body.password, saltRounds);
@@ -29,7 +29,8 @@ router.post('/register', (req, res) => {
     data.name &&
     data.email &&
     data.direction &&
-    data.lastName
+    data.phone &&
+    data.extraInfo
   ) {
     User.find({ email: data.email }, (err, userFound) => {
       if (err) {
@@ -81,7 +82,9 @@ router.post('/login', (req, res) => {
         'email',
         '_id',
         'direction',
-        'lastName',
+        'name',
+        'phone',
+        'extraInfo',
         'role',
       ]);
       const token = jwt.sign(data, privateKey, { expiresIn: '48h' });
