@@ -37,9 +37,9 @@ router.post('/register', (req, res) => {
         return res.status(500).json({ ok: false, message: 'Server error' });
       }
 
-      if (userFound === undefined) {
+      if (userFound.length > 0) {
         return res
-          .status(400)
+          .status(500)
           .json({ ok: false, message: 'There is a user with that email' });
       } else {
         User.create(data, (err, user) => {
