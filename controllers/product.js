@@ -44,14 +44,13 @@ router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
     'name',
     'top',
     'available',
-    'state',
   ]);
   Object.assign(data, { image: null });
   if (data.type === 'docena' || data.type === 'helado') {
     Object.assign(data, { flavors: body.flavors });
     console.log(data);
   }
-  if (data.type && data.description && data.price && data.name && data.top) {
+  if (data.type && data.description && data.price && data.name) {
     Product.create(data, (err, productCreated) => {
       if (err) {
         return res.status(500).json({ ok: false, message: 'Internal error' });

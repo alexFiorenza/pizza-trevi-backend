@@ -2,7 +2,7 @@ const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
 const veriftyToken = (req, res, next) => {
-  const token = req.headers.authorization;
+  const token = req.headers.authorization.replace(/['"]+/g, '');
   const privateKey = fs.readFileSync(
     path.join(__dirname, './private.key'),
     'utf8'
