@@ -8,21 +8,24 @@ const productController = require('./controllers/product');
 const path = require('path');
 const fileupload = require('express-fileupload');
 const orderController = require('./controllers/order');
+const cors = require('cors');
 /*CORS*/
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header(
-    'Access-Control-Allow-Headers',
-    'Authorization, X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Allow-Request-Method'
-  );
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-  res.header('Allow', 'GET, POST, OPTIONS, PUT, DELETE');
-  next();
-});
-
+app.use(cors());
 /*Middlewares*/
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(
+  bodyParser.json({
+    limit: '50mb',
+  })
+);
+
+app.use(
+  bodyParser.urlencoded({
+    limit: '50mb',
+    parameterLimit: 100000,
+    extended: true,
+  })
+);
+
 app.use(express.static(path.join(__dirname, './uploads')));
 app.use(fileupload());
 app.use('/api', userController);

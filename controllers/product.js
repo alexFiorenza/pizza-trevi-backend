@@ -5,6 +5,7 @@ const { veriftyToken, verifyAdmin } = require('../middlewares/auth');
 const _ = require('underscore');
 const path = require('path');
 const fs = require('fs');
+const fileupload = require('../utils/fileupload');
 /*Get all products*/
 router.get('/products', (req, res) => {
   Product.find((err, productsFound) => {
@@ -22,7 +23,8 @@ router.get('/products', (req, res) => {
 /*Get one  product*/
 router.get('/product/:id', (req, res) => {
   const params = req.params.id;
-  Product.findOne(params, (err, productFound) => {
+  console.log(params);
+  Product.findOne({ _id: params }, (err, productFound) => {
     if (err) {
       return res.status(500).json({ ok: false, message: 'Internal error' });
     }
@@ -37,6 +39,7 @@ router.get('/product/:id', (req, res) => {
 /*Upload a new product*/
 router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
   const body = req.body;
+  console.log(req.headers['content-type']);
   const data = _.pick(body, [
     'type',
     'description',
@@ -45,20 +48,31 @@ router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
     'top',
     'available',
   ]);
-  Object.assign(data, { image: null });
-  if (data.type === 'docena' || data.type === 'helado') {
-    Object.assign(data, { flavors: body.flavors });
+  if (req.files !== null) {
     console.log(data);
-  }
-  if (data.type && data.description && data.price && data.name) {
-    Product.create(data, (err, productCreated) => {
-      if (err) {
-        return res.status(500).json({ ok: false, message: 'Internal error' });
-      }
-      return res
-        .status(200)
-        .json({ ok: true, message: 'Product was created', productCreated });
-    });
+    if (data.type && data.description && data.price >= 0 && data.name) {
+      console.log('entered');
+      Product.create(data, (err, productCreated) => {
+        if (err) {
+          return res.status(500).json({ ok: false, message: 'Internal error' });
+        }
+        return fileupload(productCreated._id, req, res);
+      });
+    }
+  } else {
+    Object.assign(data, { image: null });
+
+    if (data.type && data.description && data.price >= 0 && data.name) {
+      console.log(data);
+      Product.create(data, (err, productCreated) => {
+        if (err) {
+          return res.status(500).json({ ok: false, message: 'Internal error' });
+        }
+        return res
+          .status(200)
+          .json({ ok: true, message: 'Product was created', productCreated });
+      });
+    }
   }
 });
 /*Update a product*/
