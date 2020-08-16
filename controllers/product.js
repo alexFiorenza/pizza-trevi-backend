@@ -6,6 +6,7 @@ const _ = require('underscore');
 const path = require('path');
 const fs = require('fs');
 const fileupload = require('../utils/fileupload');
+const fileUpload = require('express-fileupload');
 /*Get all products*/
 router.get('/products', (req, res) => {
   Product.find((err, productsFound) => {
@@ -23,7 +24,7 @@ router.get('/products', (req, res) => {
 /*Get one  product*/
 router.get('/product/:id', (req, res) => {
   const params = req.params.id;
-  console.log(params);
+
   Product.findOne({ _id: params }, (err, productFound) => {
     if (err) {
       return res.status(500).json({ ok: false, message: 'Internal error' });
@@ -39,7 +40,7 @@ router.get('/product/:id', (req, res) => {
 /*Upload a new product*/
 router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
   const body = req.body;
-  console.log(req.headers['content-type']);
+
   const data = _.pick(body, [
     'type',
     'description',
@@ -49,9 +50,7 @@ router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
     'available',
   ]);
   if (req.files !== null) {
-    console.log(data);
     if (data.type && data.description && data.price >= 0 && data.name) {
-      console.log('entered');
       Product.create(data, (err, productCreated) => {
         if (err) {
           return res.status(500).json({ ok: false, message: 'Internal error' });
@@ -63,7 +62,6 @@ router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
     Object.assign(data, { image: null });
 
     if (data.type && data.description && data.price >= 0 && data.name) {
-      console.log(data);
       Product.create(data, (err, productCreated) => {
         if (err) {
           return res.status(500).json({ ok: false, message: 'Internal error' });
@@ -88,52 +86,52 @@ router.put('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
     'available',
     'state',
   ]);
-  if (dataToUpdate.type === 'docena' || dataToUpdate.type === 'helado') {
-    Object.assign(dataToUpdate, { flavors: body.flavors });
-  }
-  Product.findByIdAndUpdate(
-    params,
-    dataToUpdate,
-    { useFindAndModify: false, new: true },
-    (err, objUpdated) => {
-      if (err) {
-        return res.status(500).json({ ok: false, message: 'Internal error' });
+  if (req.files !== null) {
+    Product.findByIdAndUpdate(
+      params,
+      dataToUpdate,
+      { useFindAndModify: false, new: true },
+      (err, objUpdated) => {
+        console.log(objUpdated);
+        if (err) {
+          return res.status(500).json({ ok: false, message: 'Internal error' });
+        }
+        return fileupload(params, req, res);
       }
-      return res
-        .status(200)
-        .json({ ok: true, message: 'Product updated', objUpdated });
-    }
-  );
+    );
+  } else {
+    Product.findByIdAndUpdate(
+      params,
+      dataToUpdate,
+      { useFindAndModify: false, new: true },
+      (err, objUpdated) => {
+        if (err) {
+          return res.status(500).json({ ok: false, message: 'Internal error' });
+        }
+        return res
+          .status(200)
+          .json({ ok: true, message: 'Product updated', objUpdated });
+      }
+    );
+  }
 });
 /*Delete a product*/
 router.delete('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
   const query = req.query.disable;
   const id = req.params.id;
-  if (query === 'true') {
-    Product.findByIdAndUpdate(
-      id,
-      { state: false },
-      { new: true },
-      { useFindAndModify: false, new: true },
-      (err, productUpdated) => {
-        if (err) {
-          return res.status(500).json({ ok: false, message: 'Internal error' });
-        }
-        return res.status(200).json({ ok: true, message: productUpdated });
-      }
-    );
-  } else {
-    Product.findByIdAndDelete(id, (err, productDeleted) => {
-      if (err) {
-        return res.status(500).json({ ok: false, message: 'Internal error' });
-      }
-      if (productDeleted) {
-        return res
-          .status(200)
-          .json({ ok: true, message: 'Product was deleted' });
-      }
-    });
-  }
+  Product.findById(id, (err, productFound) => {
+    if (productFound.image != null) {
+      fs.unlinkSync(path.join(__dirname, `../uploads/${productFound.image}`));
+    }
+  });
+  Product.findByIdAndDelete(id, (err, productDeleted) => {
+    if (err) {
+      return res.status(500).json({ ok: false, message: 'Internal error' });
+    }
+    if (productDeleted) {
+      return res.status(200).json({ ok: true, message: 'Product was deleted' });
+    }
+  });
 });
 /*Upload a image to a product*/
 router.put('/upload/:id', veriftyToken, verifyAdmin, (req, res) => {
