@@ -16,7 +16,7 @@ router.get('/order/:id', veriftyToken, (req, res) => {
       return res.status(200).json({ ok: true, message: orderFound });
     });
 });
-/*TODO Update an order*/
+
 router.put('/order/:id', veriftyToken, verifyAdmin, (req, res) => {
   const params = req.params.id;
   const body = req.body;

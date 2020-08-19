@@ -1,2 +1,5 @@
 node_modules/
 middlewares/private.key
+uploads/*.jpeg
+uploads/*.jpg
+uploads/*.png

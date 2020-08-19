@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+let server = require('http').createServer(app);
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const PORT = process.env.PORT || 3000;
@@ -9,6 +10,7 @@ const path = require('path');
 const fileupload = require('express-fileupload');
 const orderController = require('./controllers/order');
 const cors = require('cors');
+const socketIo = require('socket.io');
 /*CORS*/
 app.use(cors());
 /*Middlewares*/
@@ -17,7 +19,6 @@ app.use(
     limit: '50mb',
   })
 );
-
 app.use(
   bodyParser.urlencoded({
     limit: '50mb',
@@ -31,12 +32,14 @@ app.use(fileupload());
 app.use('/api', userController);
 app.use('/api', productController);
 app.use('/api', orderController);
+module.exports.io = socketIo(server);
+require('./socket/socket');
 mongoose.connect(
   'mongodb://localhost:27017/pizzatrevi',
   { useNewUrlParser: true, useUnifiedTopology: true },
   () => {
     console.log('Correctly connected to db');
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Server is running on http://localhost:${PORT}`);
     });
   }
