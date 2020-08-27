@@ -37,7 +37,12 @@ router.put('/order/:id', veriftyToken, verifyAdmin, (req, res) => {
 router.post('/order', veriftyToken, (req, res) => {
   const body = req.body;
   const user = req.user;
-  const pickedData = _.pick(body, ['products', 'total', 'status']);
+  const pickedData = _.pick(body, [
+    'products',
+    'total',
+    'status',
+    'instructions',
+  ]);
   const data = {
     total: pickedData.total,
     products: pickedData.products,

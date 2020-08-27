@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const { veriftyToken, verifyAdmin } = require('../middlewares/auth');
 
 /*Register user*/
 router.post('/register', (req, res) => {
@@ -54,6 +55,17 @@ router.post('/register', (req, res) => {
     res.status(400).json({ ok: false, message: 'Data not provided' });
   }
 });
+/*Update user data*/
+router.put('/user/:id', veriftyToken, (req, res) => {
+  const id = req.params.id;
+  const data = req.body;
+  User.findByIdAndUpdate(id, data, { new: true }, (err, userUpdated) => {
+    if (err) {
+      return res.status(500).json({ ok: false, message: 'Server error' });
+    }
+    return res.status(200).json({ ok: true, message: userUpdated });
+  });
+});
 /*LogIn logic*/
 router.post('/login', (req, res) => {
   const body = req.body;
@@ -92,5 +104,23 @@ router.post('/login', (req, res) => {
     });
   });
 });
-
+/*Generate token*/
+router.post('/token', (req, res) => {
+  const privateKey = fs.readFileSync(
+    path.join(__dirname, '../middlewares/private.key'),
+    'utf8'
+  );
+  const body = req.body;
+  const data = _.pick(body, [
+    'email',
+    '_id',
+    'direction',
+    'name',
+    'phone',
+    'extraInfo',
+    'role',
+  ]);
+  const token = jwt.sign(data, privateKey, { expiresIn: '48h' });
+  return res.status(200).json({ token: token });
+});
 module.exports = router;
