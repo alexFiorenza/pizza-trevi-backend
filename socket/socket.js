@@ -13,5 +13,8 @@ io.on('connection', (client) => {
       callback({ ok: true, message: 'Data stored succesfully' });
     });
   });
+  client.on('adminResponseOrder', (data) => {
+    io.emit('updatedOrder', data);
+  });
   client.on('disconnect', () => {});
 });

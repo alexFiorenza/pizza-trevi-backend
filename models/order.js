@@ -8,6 +8,6 @@ const orderSchema = new Schema({
   products: [{}],
   status: String,
   date: { type: Date, default: Date.now },
-  user: { type: mongoose.Schema.ObjectId, ref: 'User' },
+  user: { type: Object },
 });
 module.exports = mongoose.model('Order', orderSchema);
