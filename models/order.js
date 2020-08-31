@@ -9,5 +9,6 @@ const orderSchema = new Schema({
   status: String,
   date: { type: Date, default: Date.now },
   user: { type: Object },
+  time: { type: Number },
 });
 module.exports = mongoose.model('Order', orderSchema);

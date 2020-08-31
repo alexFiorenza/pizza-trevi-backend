@@ -14,7 +14,12 @@ io.on('connection', (client) => {
     });
   });
   client.on('adminResponseOrder', (data) => {
-    io.emit('updatedOrder', data);
+    Order.findByIdAndUpdate({ _id: data._id }, data, (err, dataUpdated) => {
+      if (err) {
+        return res.status(200).json({ ok: false, message: 'Internal error' });
+      }
+      return io.emit('updatedOrder', dataUpdated);
+    });
   });
   client.on('disconnect', () => {});
 });
