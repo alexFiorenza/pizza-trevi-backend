@@ -3,8 +3,9 @@ const router = express.Router();
 const Order = require('../models/order');
 const _ = require('underscore');
 const { veriftyToken, verifyAdmin } = require('../middlewares/auth');
+const moment = require('moment');
 /*Get all orders */
-router.get('/order', veriftyToken, (req, res) => {
+router.get('/orders', veriftyToken, (req, res) => {
   Order.find({}).exec((err, orderFound) => {
     if (err) {
       return res.status(500).json({ ok: false, message: 'Internal error' });
@@ -23,6 +24,25 @@ router.get('/order/:id', veriftyToken, (req, res) => {
       }
       return res.status(200).json({ ok: true, message: orderFound });
     });
+});
+/*Get orders per date and status*/
+router.get('/orders/date', (req, res) => {
+  const date = moment().subtract(10, 'days').calendar();
+  Order.find({ $or: [{ status: 'activo' }, { status: 'pendiente' }] }).exec(
+    (err, orderFound) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: 'Internal error' });
+      }
+      let orders = [];
+      orderFound.forEach((p) => {
+        const orderDay = moment(p.date).subtract(10, 'days').calendar();
+        if (orderDay === date) {
+          orders.push(p);
+        }
+      });
+      return res.status(200).json({ ok: true, message: orders });
+    }
+  );
 });
 
 router.put('/order/:id', veriftyToken, verifyAdmin, (req, res) => {
