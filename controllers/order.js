@@ -13,20 +13,18 @@ router.get('/orders', veriftyToken, (req, res) => {
     return res.status(200).json({ ok: true, message: orderFound });
   });
 });
-/*Get one order per id*/
-router.get('/order/:id', veriftyToken, (req, res) => {
+/*Get one order per userid*/
+router.get('/order/:id', (req, res) => {
   const params = req.params.id;
-  Order.findById(params)
-    .populate('user', '_id name lastName direction extraInfo')
-    .exec((err, orderFound) => {
-      if (err) {
-        return res.status(500).json({ ok: false, message: 'Internal error' });
-      }
-      return res.status(200).json({ ok: true, message: orderFound });
-    });
+  Order.find({ 'user._id': params }).exec((err, orderFound) => {
+    if (err) {
+      return res.status(500).json({ ok: false, message: 'Internal error' });
+    }
+    return res.status(200).json({ ok: true, message: orderFound });
+  });
 });
 /*Get orders per date and status*/
-router.get('/orders/date', (req, res) => {
+router.get('/orders/date', veriftyToken, (req, res) => {
   const date = moment().subtract(10, 'days').calendar();
   Order.find({ $or: [{ status: 'activo' }, { status: 'pendiente' }] }).exec(
     (err, orderFound) => {
