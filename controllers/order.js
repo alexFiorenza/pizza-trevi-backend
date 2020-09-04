@@ -14,14 +14,29 @@ router.get('/orders', veriftyToken, (req, res) => {
   });
 });
 /*Get one order per userid*/
-router.get('/order/:id', (req, res) => {
+router.get('/order/:id', veriftyToken, (req, res) => {
   const params = req.params.id;
-  Order.find({ 'user._id': params }).exec((err, orderFound) => {
-    if (err) {
-      return res.status(500).json({ ok: false, message: 'Internal error' });
-    }
-    return res.status(200).json({ ok: true, message: orderFound });
-  });
+  const query = req.query;
+  if (query.inprogress === 'true') {
+    Order.find({
+      $and: [
+        { 'user._id': params },
+        { $or: [{ status: 'pendiente' }, { status: 'activo' }] },
+      ],
+    }).exec((err, orderFound) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: 'Internal error' });
+      }
+      return res.status(200).json({ ok: true, message: orderFound });
+    });
+  } else {
+    Order.find({ 'user._id': params }).exec((err, orderFound) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: 'Internal error' });
+      }
+      return res.status(200).json({ ok: true, message: orderFound });
+    });
+  }
 });
 /*Get orders per date and status*/
 router.get('/orders/date', veriftyToken, (req, res) => {
