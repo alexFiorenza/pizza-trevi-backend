@@ -66,6 +66,18 @@ router.put('/user/:id', veriftyToken, (req, res) => {
     return res.status(200).json({ ok: true, message: userUpdated });
   });
 });
+/*Delete a user*/
+router.delete('/user/:id', veriftyToken, (req, res) => {
+  const id = req.params.id;
+  User.findByIdAndDelete(id, (err, deletedDocument) => {
+    if (err) {
+      return res.status(500).json({ ok: false, message: 'Internal error' });
+    }
+    return res
+      .status(200)
+      .json({ ok: true, message: 'User deleted correctly' });
+  });
+});
 /*LogIn logic*/
 router.post('/login', (req, res) => {
   const body = req.body;
@@ -99,7 +111,7 @@ router.post('/login', (req, res) => {
         'extraInfo',
         'role',
       ]);
-      const token = jwt.sign(data, privateKey, { expiresIn: '48h' });
+      const token = jwt.sign(data, privateKey, { expiresIn: '24h' });
       return res.status(200).json({ ok: true, token });
     });
   });
