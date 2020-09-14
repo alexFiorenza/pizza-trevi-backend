@@ -6,12 +6,14 @@ const { veriftyToken, verifyAdmin } = require('../middlewares/auth');
 const moment = require('moment');
 /*Get all orders */
 router.get('/orders', veriftyToken, (req, res) => {
-  Order.find({}).exec((err, orderFound) => {
-    if (err) {
-      return res.status(500).json({ ok: false, message: 'Internal error' });
-    }
-    return res.status(200).json({ ok: true, message: orderFound });
-  });
+  Order.find({})
+    .sort({ field: 'desc' })
+    .exec((err, orderFound) => {
+      if (err) {
+        return res.status(500).json({ ok: false, message: 'Internal error' });
+      }
+      return res.status(200).json({ ok: true, message: orderFound });
+    });
 });
 /*Get one order per userid*/
 router.get('/order/:id', veriftyToken, (req, res) => {
@@ -30,19 +32,22 @@ router.get('/order/:id', veriftyToken, (req, res) => {
       return res.status(200).json({ ok: true, message: orderFound });
     });
   } else {
-    Order.find({ 'user._id': params }).exec((err, orderFound) => {
-      if (err) {
-        return res.status(500).json({ ok: false, message: 'Internal error' });
-      }
-      return res.status(200).json({ ok: true, message: orderFound });
-    });
+    Order.find({ 'user._id': params })
+      .sort({ _id: -1 })
+      .exec((err, orderFound) => {
+        if (err) {
+          return res.status(500).json({ ok: false, message: 'Internal error' });
+        }
+        return res.status(200).json({ ok: true, message: orderFound });
+      });
   }
 });
 /*Get orders per date and status*/
 router.get('/orders/date', veriftyToken, (req, res) => {
   const date = moment().subtract(10, 'days').calendar();
-  Order.find({ $or: [{ status: 'activo' }, { status: 'pendiente' }] }).exec(
-    (err, orderFound) => {
+  Order.find({ $or: [{ status: 'activo' }, { status: 'pendiente' }] })
+    .sort({ field: 'desc' })
+    .exec((err, orderFound) => {
       if (err) {
         return res.status(500).json({ ok: false, message: 'Internal error' });
       }
@@ -54,8 +59,7 @@ router.get('/orders/date', veriftyToken, (req, res) => {
         }
       });
       return res.status(200).json({ ok: true, message: orders });
-    }
-  );
+    });
 });
 
 router.put('/order/:id', veriftyToken, verifyAdmin, (req, res) => {
@@ -83,6 +87,7 @@ router.post('/order', veriftyToken, (req, res) => {
     'total',
     'status',
     'instructions',
+    'extraMoney',
   ]);
   const data = {
     total: pickedData.total,
