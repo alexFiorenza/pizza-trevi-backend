@@ -11,6 +11,8 @@ const fileupload = require('express-fileupload');
 const orderController = require('./controllers/order');
 const cors = require('cors');
 const socketIo = require('socket.io');
+require('dotenv').config();
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@pizza-in-trevi.kqqrm.mongodb.net/${process.env.DB_DATABASE}?retryWrites=true&w=majority`;
 /*CORS*/
 app.use(cors());
 /*Middlewares*/
@@ -35,12 +37,12 @@ app.use('/api', orderController);
 module.exports.io = socketIo(server);
 require('./socket/socket');
 mongoose.connect(
-  'mongodb://localhost:27017/pizzatrevi',
+  uri,
   { useNewUrlParser: true, useUnifiedTopology: true },
   () => {
     console.log('Correctly connected to db');
     server.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+      console.log('Succesfully connected');
     });
   }
 );

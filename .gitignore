@@ -3,3 +3,4 @@ middlewares/private.key
 uploads/*.jpeg
 uploads/*.jpg
 uploads/*.png
+.env
