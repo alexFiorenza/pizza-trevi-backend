@@ -31,6 +31,9 @@ app.use(
 
 app.use(express.static(path.join(__dirname, './uploads')));
 app.use(fileupload());
+app.get('/', (req, res) => {
+  return res.status(200).json({ ok: true, message: 'Api working properly' });
+});
 app.use('/api', userController);
 app.use('/api', productController);
 app.use('/api', orderController);
