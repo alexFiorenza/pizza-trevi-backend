@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();
 const { veriftyToken, verifyAdmin } = require('../middlewares/auth');
 
 /*Register user*/
@@ -81,10 +82,7 @@ router.delete('/user/:id', veriftyToken, (req, res) => {
 /*LogIn logic*/
 router.post('/login', (req, res) => {
   const body = req.body;
-  const privateKey = fs.readFileSync(
-    path.join(__dirname, '../middlewares/private.key'),
-    'utf8'
-  );
+  const privateKey = process.env.JWT_PRIVATE;
   const dataPicked = _.pick(body, ['email', 'password']);
   User.findOne({ email: dataPicked.email }, (err, userFound) => {
     if (err) {
@@ -118,10 +116,7 @@ router.post('/login', (req, res) => {
 });
 /*Generate token*/
 router.post('/token', (req, res) => {
-  const privateKey = fs.readFileSync(
-    path.join(__dirname, '../middlewares/private.key'),
-    'utf8'
-  );
+  const privateKey = process.env.JWT_PRIVATE;
   const body = req.body;
   const data = _.pick(body, [
     'email',

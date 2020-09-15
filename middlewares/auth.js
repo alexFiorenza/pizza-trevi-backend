@@ -1,12 +1,11 @@
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();
+
 const veriftyToken = (req, res, next) => {
   const token = req.headers.authorization.replace(/['"]+/g, '');
-  const privateKey = fs.readFileSync(
-    path.join(__dirname, './private.key'),
-    'utf8'
-  );
+  const privateKey = process.env.JWT_PRIVATE;
   jwt.verify(token, privateKey, (err, decoded) => {
     if (err) {
       next(new Error('Invalid Token'));

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-dev": "nodemon index.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "auth": "node ./middlewares/auth.js"
   },
   "author": "Alex Fiorenza",
   "license": "MIT",

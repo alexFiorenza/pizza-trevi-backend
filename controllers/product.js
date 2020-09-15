@@ -92,7 +92,6 @@ router.put('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
       dataToUpdate,
       { useFindAndModify: false, new: true },
       (err, objUpdated) => {
-        console.log(objUpdated);
         if (err) {
           return res.status(500).json({ ok: false, message: 'Internal error' });
         }
