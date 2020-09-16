@@ -16,7 +16,7 @@ var uri;
 if (PORT !== 3000) {
   uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@pizza-in-trevi.kqqrm.mongodb.net/${process.env.DB_DATABASE}?retryWrites=true&w=majority`;
 } else {
-  uri = 'mongodb://localhost:27017';
+  uri = 'mongodb://localhost:27017/pizzatrevi';
 }
 /*CORS*/
 app.use(cors());
@@ -33,7 +33,6 @@ app.use(
     extended: true,
   })
 );
-
 app.use(express.static(path.join(__dirname, './uploads')));
 app.use(fileupload());
 app.get('/', (req, res) => {
