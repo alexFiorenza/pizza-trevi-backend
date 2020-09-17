@@ -2,6 +2,7 @@ const Product = require('../models/product');
 const path = require('path');
 const fs = require('fs');
 const { Storage } = require('@google-cloud/storage');
+const PORT = process.env.PORT || 3000;
 var gc;
 if (PORT === 3000) {
   gc = new Storage({
