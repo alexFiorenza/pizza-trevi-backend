@@ -6,7 +6,13 @@ const _ = require('underscore');
 const path = require('path');
 const fs = require('fs');
 const fileupload = require('../utils/fileupload');
-const fileUpload = require('express-fileupload');
+const { Storage } = require('@google-cloud/storage');
+const { format } = require('path');
+const gc = new Storage({
+  keyFilename: path.join(__dirname, '../pizza-in-trevi-57cb0ccabd46.json'),
+  projectId: 'pizza-in-trevi',
+});
+const fileUploadBucket = gc.bucket('pizzaintrevi-fileupload');
 /*Get all products*/
 router.get('/products', (req, res) => {
   Product.find((err, productsFound) => {
@@ -60,7 +66,6 @@ router.post('/product', veriftyToken, verifyAdmin, (req, res) => {
     }
   } else {
     Object.assign(data, { image: null });
-
     if (data.type && data.description && data.price >= 0 && data.name) {
       Product.create(data, (err, productCreated) => {
         if (err) {
@@ -119,8 +124,9 @@ router.delete('/product/:id', veriftyToken, verifyAdmin, (req, res) => {
   const query = req.query.disable;
   const id = req.params.id;
   Product.findById(id, (err, productFound) => {
-    if (productFound.image != null) {
-      fs.unlinkSync(path.join(__dirname, `../uploads/${productFound.image}`));
+    if (productFound.imageName !== null) {
+      const name = productFound.imageName;
+      fileUploadBucket.file(name).delete();
     }
   });
   Product.findByIdAndDelete(id, (err, productDeleted) => {
@@ -144,40 +150,50 @@ router.put('/upload/:id', veriftyToken, verifyAdmin, (req, res) => {
         .status(400)
         .json({ ok: false, message: 'There was no product' });
     }
-    if (productFound.image != null) {
-      fs.unlinkSync(path.join(__dirname, `../uploads/${productFound.image}`));
+    if (productFound.imageName !== null) {
+      const name = productFound.imageName;
+      fileUploadBucket.file(name).delete();
     }
     const image = req.files.image;
+    const data = image.data;
     const imageName = image.name.replace(/\s/g, '');
     const splitedName = imageName.split('.');
     const ext = splitedName[splitedName.length - 1];
     if (ext === 'jpeg' || ext === 'png' || ext === 'jpg') {
       const imageToStore = `${splitedName[0]}-${Date.now()}.${ext}`;
-      Product.findOneAndUpdate(
-        { _id: params },
-        { image: imageToStore },
-        { new: true },
-        (err, productUpdated) => {
-          if (err) {
-            return res
-              .status(500)
-              .json({ ok: false, message: 'Internal error' });
-          }
-          image.mv(
-            path.join(__dirname, `../uploads/${imageToStore}`),
-            (err, imageStored) => {
+      const file = fileUploadBucket.file(imageToStore);
+      const fileStream = file.createWriteStream({
+        resumable: false,
+      });
+      fileStream
+        .on('finish', () => {
+          const publicUrl = `https://storage.googleapis.com/${fileUploadBucket.name}/${file.name}`;
+
+          Product.findOneAndUpdate(
+            { _id: params },
+            { $set: { image: publicUrl, imageName: imageToStore } },
+            { new: true },
+            (err, productUpdated) => {
               if (err) {
                 return res
                   .status(500)
-                  .json({ ok: false, message: 'Image couldnt be saved' });
+                  .json({ ok: false, message: 'Internal error' });
               }
-              return res
-                .status(200)
-                .json({ ok: true, message: productUpdated });
+              return res.status(200).json({
+                ok: true,
+                message: 'Image updated',
+                product: productUpdated,
+              });
             }
           );
-        }
-      );
+        })
+        .on('error', () => {
+          return res.status(500).json({
+            ok: false,
+            message: 'Unable to upload image something went wrong',
+          });
+        })
+        .end(data);
     }
   });
 });

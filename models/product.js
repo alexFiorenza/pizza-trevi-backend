@@ -7,6 +7,7 @@ const productSchema = new Schema({
   description: String,
   name: String,
   image: String,
+  imageName: { type: String, default: null },
   top: Boolean,
   available: Boolean,
   flavors: String,
