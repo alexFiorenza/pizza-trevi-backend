@@ -7,7 +7,6 @@ const path = require('path');
 const fs = require('fs');
 const fileupload = require('../utils/fileupload');
 const { Storage } = require('@google-cloud/storage');
-const GoogleAuth = require('google-auth-library');
 const PORT = process.env.PORT || 3000;
 var gc;
 if (PORT === 3000) {

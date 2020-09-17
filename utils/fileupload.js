@@ -2,11 +2,18 @@ const Product = require('../models/product');
 const path = require('path');
 const fs = require('fs');
 const { Storage } = require('@google-cloud/storage');
-const { format } = require('path');
-const gc = new Storage({
-  keyFilename: path.join(__dirname, '../pizza-in-trevi-57cb0ccabd46.json'),
-  projectId: 'pizza-in-trevi',
-});
+var gc;
+if (PORT === 3000) {
+  gc = new Storage({
+    keyFilename: path.join(__dirname, '../pizza-in-trevi-57cb0ccabd46.json'),
+    projectId: 'pizza-in-trevi',
+  });
+} else {
+  gc = new Storage({
+    keyFilename: path.join(__dirname, '../gcpconfig.json'),
+    projectId: 'pizza-in-trevi',
+  });
+}
 const fileUploadBucket = gc.bucket('pizzaintrevi-fileupload');
 function fileUpload(id, req, res) {
   const params = id;
