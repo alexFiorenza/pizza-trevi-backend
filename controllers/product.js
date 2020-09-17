@@ -7,11 +7,23 @@ const path = require('path');
 const fs = require('fs');
 const fileupload = require('../utils/fileupload');
 const { Storage } = require('@google-cloud/storage');
-const { format } = require('path');
-const gc = new Storage({
-  keyFilename: path.join(__dirname, '../pizza-in-trevi-57cb0ccabd46.json'),
-  projectId: 'pizza-in-trevi',
-});
+const GoogleAuth = require('google-auth-library');
+const PORT = process.env.PORT || 3000;
+var gc;
+if (PORT === 3000) {
+  gc = new Storage({
+    keyFilename: path.join(__dirname, '../pizza-in-trevi-57cb0ccabd46.json'),
+    projectId: 'pizza-in-trevi',
+  });
+} else {
+  gc = new Storage({
+    keyFilename: path.join(
+      __dirname,
+      process.env.GOOGLE_APPLICATION_CREDENTIALS
+    ),
+    projectId: 'pizza-in-trevi',
+  });
+}
 const fileUploadBucket = gc.bucket('pizzaintrevi-fileupload');
 /*Get all products*/
 router.get('/products', (req, res) => {
