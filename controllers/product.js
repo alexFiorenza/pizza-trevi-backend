@@ -17,10 +17,7 @@ if (PORT === 3000) {
   });
 } else {
   gc = new Storage({
-    keyFilename: path.join(
-      __dirname,
-      process.env.GOOGLE_APPLICATION_CREDENTIALS
-    ),
+    keyFilename: path.join(__dirname, '../gcpconfig.json'),
     projectId: 'pizza-in-trevi',
   });
 }
