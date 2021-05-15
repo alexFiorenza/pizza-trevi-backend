@@ -14,7 +14,7 @@ const socketIo = require('socket.io');
 require('dotenv').config();
 var uri;
 if (PORT !== 3000) {
-  uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@pizza-in-trevi.kqqrm.mongodb.net/${process.env.DB_DATABASE}?retryWrites=true&w=majority`;
+  uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@pizza-in-trevi-lomas.kqqrm.mongodb.net/${process.env.DB_DATABASE}?retryWrites=true&w=majority`;
 } else {
   uri = 'mongodb://localhost:27017/pizzatrevi';
 }
